@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postcard Game</title>
+
+    <!-- Phaser 3 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+    <!-- Your Game Files (ORDER MATTERS) -->
+    <script src="src/scenes/BootScene.js"></script>
+    <script src="src/scenes/LectureHallScene.js"></script>
+    <script src="src/scenes/JournalScene.js"></script>
+    <script src="src/scenes/CompletionScene.js"></script> <!-- Add this -->
+    <script src="src/prefabs/Player.js"></script>
+    <script src="src/prefabs/MemoryCard.js"></script>
+    <script src="src/systems/GradeSystem.js"></script>
+    <script src="src/main.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>
