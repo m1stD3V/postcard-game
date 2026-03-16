@@ -12,7 +12,7 @@ window.onload = function() {
             arcade: { debug: false }
         },
         // Add CompletionScene here
-        scene: [BootScene, LectureHallScene, JournalScene, CompletionScene]
+        scene: [BootScene, LectureHallScene, JournalScene, CompletionScene, PostcardScene]
     };
 
     const game = new Phaser.Game(config);
