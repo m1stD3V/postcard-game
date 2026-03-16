@@ -2,6 +2,7 @@ class JournalScene extends Phaser.Scene {
     constructor() {
         super("JournalScene");
     }
+
     create() {
         this.currentRound = 0;
         this.totalCorrect = 0;
@@ -14,6 +15,7 @@ class JournalScene extends Phaser.Scene {
         this.drawBackground();
         this.startRound();
     }
+
     drawBackground() {
         const bg = this.add.graphics();
         bg.fillGradientStyle(0xf5e6c8, 0xf5e6c8, 0xe8d5a3, 0xe8d5a3, 1);
@@ -76,6 +78,7 @@ class JournalScene extends Phaser.Scene {
         spine.lineTo(485, pageY + pageHeight);
         spine.strokePath();
     }
+
     startRound() {
         if (this.roundElements) {
             this.roundElements.forEach(e => e.destroy());
@@ -105,6 +108,7 @@ class JournalScene extends Phaser.Scene {
             this.createDraggableCards(cardCount);
         });
     }
+
     showMemorizeCards(cardCount) {
         this.memCards = [];
         const startX = 80;
@@ -123,6 +127,7 @@ class JournalScene extends Phaser.Scene {
             elements.forEach(e => this.roundElements.push(e));
         }
     }
+
     drawIndexCard(cx, cy, w, h, label) {
         const card = this.add.graphics();
         card.fillStyle(0xb8975a, 0.3);
@@ -146,6 +151,7 @@ class JournalScene extends Phaser.Scene {
         }).setOrigin(0.5);
         return [card, text];
     }
+
     createDraggableCards(cardCount) {
         this.draggableCards = [];
         this.dropZones = [];
@@ -244,6 +250,10 @@ class JournalScene extends Phaser.Scene {
                     cardText.x = nearest.x; cardText.y = nearest.y + 4;
                     hitArea.setData('droppedZone', nearest.index);
                     nearest.occupied = hitArea;
+
+                    // Click sound when card snaps into zone
+                    this.sound.play('click', { volume: 0.5 });
+
                     nearest.gfx.clear();
                     nearest.gfx.fillStyle(0xe8d5a3, 0.4);
                     nearest.gfx.fillRoundedRect(nearest.x - cardW / 2, nearest.y - cardH / 2, cardW, cardH, 4);
@@ -277,6 +287,7 @@ class JournalScene extends Phaser.Scene {
         this.roundElements.push(submitGfx, submitText, submitHit);
         this.input.keyboard.once('keydown-SPACE', () => this.checkOrder());
     }
+
     getNearestZone(x, y, threshold) {
         let nearest = null;
         let minDist = threshold;
@@ -286,6 +297,7 @@ class JournalScene extends Phaser.Scene {
         });
         return nearest;
     }
+
     checkOrder() {
         const cardCount = this.roundConfigs[this.currentRound].cardCount;
         let roundCorrect = 0;
@@ -299,6 +311,12 @@ class JournalScene extends Phaser.Scene {
             zone.gfx.lineStyle(2, correct ? 0x3a7a3a : 0x9a2a2a, 1);
             zone.gfx.strokeRoundedRect(zone.x - 27, zone.y - 36, 54, 72, 4);
         });
+
+        // Chime if perfect round
+        if (roundCorrect === cardCount) {
+            this.sound.play('chime', { volume: 0.6 });
+        }
+
         this.totalCorrect += roundCorrect;
         this.totalCards += cardCount;
         this.time.delayedCall(1200, () => {
@@ -310,6 +328,7 @@ class JournalScene extends Phaser.Scene {
             }
         });
     }
+
     endGame() {
         if (this.roundElements) {
             this.roundElements.forEach(e => e.destroy());

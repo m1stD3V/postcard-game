@@ -7,6 +7,10 @@ class LectureHallScene extends Phaser.Scene {
         this.load.tilemapTiledJSON("lectureHall", "assets/LectureHall.tmj");
         this.load.image("A5", "assets/images/A5.png");
         this.load.image("Inside_C", "assets/images/Inside_C.png");
+        this.load.spritesheet('cat', 'assets/images/Cats1.png', {
+            frameWidth: 48,
+            frameHeight: 48
+        });
     }
 
     create() {
@@ -14,7 +18,6 @@ class LectureHallScene extends Phaser.Scene {
         const map = this.make.tilemap({ key: "lectureHall" });
         const tilesA5 = map.addTilesetImage("floor", "A5");
         const tilesInsideC = map.addTilesetImage("classroom", "Inside_C");
-
         const floorLayer   = map.createLayer("Floor", tilesA5, 0, 0);
         const decorLayer   = map.createLayer("Decorations", tilesInsideC, 0, 0);
         const journalLayer = map.createLayer("Journal", tilesInsideC, 0, 0);
@@ -36,10 +39,7 @@ class LectureHallScene extends Phaser.Scene {
             : 300;
 
         // --- Player ---
-        this.player = this.physics.add.sprite(200, 300, null)
-            .setSize(32, 32)
-            .setTint(0x00ff00)
-            .setVisible(true);
+        this.player = new Player(this, 200, 300);
 
         // --- Journal interactable ---
         this.journal = this.physics.add.sprite(journalX, journalY, null)
@@ -53,10 +53,14 @@ class LectureHallScene extends Phaser.Scene {
 
         // --- Physics world bounds ---
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-        this.player.setCollideWorldBounds(true);
 
         // --- Player vs Decorations collider ---
         this.physics.add.collider(this.player, decorLayer);
+
+        // --- BGM ---
+        if (!this.sound.get('bgm')?.isPlaying) {
+            this.sound.play('bgm', { loop: true, volume: 0.4 });
+        }
 
         // --- Input ---
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -69,7 +73,6 @@ class LectureHallScene extends Phaser.Scene {
             fill: '#fff'
         }).setScrollFactor(0);
 
-        // Tab hint
         this.add.text(10, 32, "[TAB] View Report Card", {
             font: '13px Arial',
             fill: '#cccccc'
@@ -85,11 +88,8 @@ class LectureHallScene extends Phaser.Scene {
     }
 
     update() {
-        this.player.setVelocity(0);
-        if (this.cursors.left.isDown)  this.player.setVelocityX(-200);
-        if (this.cursors.right.isDown) this.player.setVelocityX(200);
-        if (this.cursors.up.isDown)    this.player.setVelocityY(-200);
-        if (this.cursors.down.isDown)  this.player.setVelocityY(200);
+        // Delegate movement and animation to Player
+        this.player.update(this.cursors);
 
         // Show "Press E" if player near journal
         const distance = Phaser.Math.Distance.Between(
@@ -100,11 +100,13 @@ class LectureHallScene extends Phaser.Scene {
 
         // Interact with journal
         if (distance < 50 && Phaser.Input.Keyboard.JustDown(this.keyE)) {
+            this.sound.play('bookOpen', { volume: 0.6 });
             this.scene.start('JournalScene');
         }
 
         // Tab — open report card
         if (Phaser.Input.Keyboard.JustDown(this.keyTab)) {
+            this.sound.play('bookOpen', { volume: 0.6 });
             this.scene.start('CompletionScene', {
                 fromLectureHall: true,
                 accuracy: window.gradeSystem.getGrade('journal') ? null : null

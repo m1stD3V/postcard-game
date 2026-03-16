@@ -1,7 +1,5 @@
 window.onload = function() {
-    // Make sure the grade system exists globally
     window.gradeSystem = new GradeSystem();
-
     const config = {
         type: Phaser.AUTO,
         width: 960,
@@ -11,9 +9,7 @@ window.onload = function() {
             default: 'arcade',
             arcade: { debug: false }
         },
-        // Add CompletionScene here
-        scene: [BootScene, LectureHallScene, JournalScene, CompletionScene, PostcardScene]
+        scene: [BootScene, StartScene, LectureHallScene, JournalScene, CompletionScene, PostcardScene, CreditsScene]
     };
-
     const game = new Phaser.Game(config);
 };

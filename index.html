@@ -8,15 +8,23 @@
     <!-- Phaser 3 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
 
-    <!-- Your Game Files (ORDER MATTERS) -->
+    <!-- Systems first -->
+    <script src="src/systems/GradeSystem.js"></script>
+
+    <!-- Prefabs -->
+    <script src="src/prefabs/Player.js"></script>
+    <script src="src/prefabs/MemoryCard.js"></script>
+
+    <!-- Scenes -->
     <script src="src/scenes/BootScene.js"></script>
+    <script src="src/scenes/StartScene.js"></script>
+    <script src="src/scenes/CreditsScene.js"></script>
     <script src="src/scenes/LectureHallScene.js"></script>
     <script src="src/scenes/JournalScene.js"></script>
     <script src="src/scenes/CompletionScene.js"></script>
     <script src="src/scenes/PostcardScene.js"></script>
-    <script src="src/prefabs/Player.js"></script>
-    <script src="src/prefabs/MemoryCard.js"></script>
-    <script src="src/systems/GradeSystem.js"></script>
+
+    <!-- Main last -->
     <script src="src/main.js"></script>
 
     <style>

@@ -4,22 +4,32 @@ class BootScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image("lecturehall", "assets/images/lecturehall.png");
-        this.load.image("journal", "assets/images/journal.png");
+        // --- Loading bar ---
+        const barBg = this.add.graphics();
+        barBg.fillStyle(0x3a2a0a, 1);
+        barBg.fillRoundedRect(280, 250, 400, 20, 6);
 
-        this.load.image("cardBack", "assets/images/cards/cardBack.png");
-        this.load.image("card1", "assets/images/cards/card1.png");
-        this.load.image("card2", "assets/images/cards/card2.png");
-        this.load.image("card3", "assets/images/cards/card3.png");
-        this.load.image("card4", "assets/images/cards/card4.png");
+        const bar = this.add.graphics();
 
-        this.load.audio("flip", "assets/audio/flip.wav");
-        this.load.audio("match", "assets/audio/match.wav");
-        this.load.audio("mismatch", "assets/audio/mismatch.wav");
-        this.load.audio("bgm", "assets/audio/bgm.mp3");
+        this.add.text(480, 220, "Loading...", {
+            font: 'italic 18px Georgia',
+            fill: '#b8975a'
+        }).setOrigin(0.5);
+
+        this.load.on('progress', (value) => {
+            bar.clear();
+            bar.fillStyle(0xb8975a, 1);
+            bar.fillRoundedRect(280, 250, 400 * value, 20, 6);
+        });
+
+        this.load.audio("bgm",      "assets/audio/bgm.mp3");
+        this.load.audio("bookOpen", "assets/audio/bookOpen.mp3");
+        this.load.audio("chime",    "assets/audio/chime.mp3");
+        this.load.audio("click",    "assets/audio/click.mp3");
+        this.load.audio("tear",     "assets/audio/tear.mp3");
     }
 
     create() {
-        this.scene.start("LectureHallScene");
+        this.scene.start("StartScene");
     }
 }
