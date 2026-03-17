@@ -1,15 +1,47 @@
+/**
+ * CompletionScene
+ * 
+ * Displays a styled report card showing the player's journal mini-game results.
+ * Can be reached two ways:
+ *   1. Automatically after finishing all three journal rounds (via JournalScene)
+ *   2. Manually at any time by pressing TAB in the LectureHallScene
+ * 
+ * The "Complete Class" button is gated behind a minimum grade of B (70% accuracy).
+ * If the player meets that threshold, they can proceed to the PostcardScene ending.
+ */
 class CompletionScene extends Phaser.Scene {
     constructor() {
         super("CompletionScene");
     }
 
+    /**
+     * create
+     * 
+     * Receives optional data passed from the previous scene:
+     *   - accuracy: percentage score from the journal mini-game (0-100)
+     *   - fromLectureHall: true if the player opened this via TAB, not after completing the game
+     * 
+     * Builds the full report card UI using Phaser Graphics and Text objects.
+     * Button layout adapts based on how the scene was accessed.
+     * 
+     * @param {object} data - Scene transition data
+     * @param {number|null} data.accuracy - Player's accuracy percentage, or null if viewed from hall
+     * @param {boolean} data.fromLectureHall - Whether opened via TAB shortcut
+     */
     create(data) {
+        // Pull the current grade from the global grade system
         const grade = window.gradeSystem.getGrade('journal');
+
+        // Accuracy is only passed when arriving from JournalScene, not from TAB
         const accuracy = data?.accuracy ?? null;
+
+        // Track how the scene was accessed to adjust button layout
         const fromLectureHall = data?.fromLectureHall ?? false;
+
+        // Gate "Complete Class" behind a B grade or higher (70%+)
         const canComplete = grade && window.gradeSystem.gradeValue(grade) >= window.gradeSystem.gradeValue('B');
 
-        // --- Cream paper background ---
+        // --- Cream paper background with subtle ruled lines ---
         const bg = this.add.graphics();
         bg.fillGradientStyle(0xf5f0e8, 0xf5f0e8, 0xe8e0cc, 0xe8e0cc, 1);
         bg.fillRect(0, 0, 960, 540);
@@ -21,7 +53,7 @@ class CompletionScene extends Phaser.Scene {
             bg.strokePath();
         }
 
-        // --- Report card panel ---
+        // --- Report card panel — outer card with double border ---
         const cardGfx = this.add.graphics();
         cardGfx.fillStyle(0xfdfaf3, 1);
         cardGfx.fillRoundedRect(180, 40, 600, 460, 4);
@@ -30,7 +62,7 @@ class CompletionScene extends Phaser.Scene {
         cardGfx.lineStyle(1, 0x3a2a0a, 0.4);
         cardGfx.strokeRoundedRect(190, 50, 580, 440, 2);
 
-        // Header band
+        // Dark header band across the top of the card
         cardGfx.fillStyle(0x1a1a2e, 1);
         cardGfx.fillRect(180, 40, 600, 70);
         cardGfx.lineStyle(2, 0x3a2a0a, 1);
@@ -47,7 +79,7 @@ class CompletionScene extends Phaser.Scene {
             fill: '#c8bfa0'
         }).setOrigin(0.5);
 
-        // --- Divider ---
+        // --- Divider below header ---
         cardGfx.lineStyle(1, 0x3a2a0a, 0.5);
         cardGfx.beginPath();
         cardGfx.moveTo(210, 130);
@@ -74,7 +106,7 @@ class CompletionScene extends Phaser.Scene {
         cardGfx.lineTo(750, 168);
         cardGfx.strokePath();
 
-        // --- Grade table header ---
+        // --- Grade table column headers ---
         this.add.text(210, 182, "Assessment", {
             font: 'bold 13px Georgia', fill: '#3a2a0a'
         });
@@ -85,16 +117,18 @@ class CompletionScene extends Phaser.Scene {
             font: 'bold 13px Georgia', fill: '#3a2a0a'
         });
 
+        // Underline the column headers
         cardGfx.lineStyle(1, 0x3a2a0a, 0.6);
         cardGfx.beginPath();
         cardGfx.moveTo(210, 200);
         cardGfx.lineTo(750, 200);
         cardGfx.strokePath();
 
-        // --- Grade row ---
+        // --- Grade data row ---
         this.add.text(210, 214, "Card Ordering Exercise", {
             font: '14px Georgia', fill: '#3a2a0a'
         });
+        // Show accuracy if available, otherwise show a dash placeholder
         this.add.text(510, 214, accuracy !== null ? `${accuracy}%` : '-', {
             font: '14px Georgia', fill: '#3a2a0a'
         });
@@ -108,7 +142,7 @@ class CompletionScene extends Phaser.Scene {
         cardGfx.lineTo(750, 236);
         cardGfx.strokePath();
 
-        // --- Final grade box ---
+        // --- Final grade summary box (right side of card) ---
         cardGfx.lineStyle(1.5, 0x3a2a0a, 0.8);
         cardGfx.strokeRoundedRect(530, 300, 190, 100, 4);
         this.add.text(625, 318, "FINAL GRADE", {
@@ -122,6 +156,7 @@ class CompletionScene extends Phaser.Scene {
         cardGfx.lineTo(710, 332);
         cardGfx.strokePath();
 
+        // Show "70%, B" format if accuracy is known, otherwise just the grade letter
         const finalLabel = accuracy !== null
             ? `${accuracy}%,  ${grade}`
             : (grade ?? 'N/A');
@@ -130,7 +165,7 @@ class CompletionScene extends Phaser.Scene {
             fill: '#1a1a2e'
         }).setOrigin(0.5);
 
-        // --- Teacher comment ---
+        // --- Teacher comment (left side of card, below grade table) ---
         this.add.text(210, 310, "Comments:", {
             font: 'bold 13px Georgia', fill: '#3a2a0a'
         });
@@ -140,7 +175,7 @@ class CompletionScene extends Phaser.Scene {
             wordWrap: { width: 290 }
         });
 
-        // --- Signature line ---
+        // --- Instructor signature line ---
         cardGfx.lineStyle(1, 0x3a2a0a, 0.5);
         cardGfx.beginPath();
         cardGfx.moveTo(210, 440);
@@ -151,12 +186,13 @@ class CompletionScene extends Phaser.Scene {
         });
 
         // --- Buttons ---
-        // Always show "Return to Lecture Hall"
+
+        // "Return to Lecture Hall" always visible
         this.drawButton(480, 496, "Return to Lecture Hall", () => {
             this.scene.start('LectureHallScene');
         });
 
-        // If arrived via journal completion, also show Replay
+        // "Replay Journal" only shown when arriving after completing the mini-game
         if (!fromLectureHall) {
             this.drawButton(270, 496, "Replay Journal", () => {
                 window.gradeSystem.setGrade('journal', null);
@@ -164,10 +200,14 @@ class CompletionScene extends Phaser.Scene {
             });
         }
 
-        // "Complete Class" gated at 70% (grade B or higher)
+        // "Complete Class" shown only if grade is B or higher (70%+ accuracy)
+        // Otherwise display a greyed-out locked message
         if (canComplete) {
             this.drawButton(fromLectureHall ? 270 : 690, 496, "Complete Class", () => {
-                this.scene.start('PostcardScene');
+                this.cameras.main.fadeOut(600, 245, 236, 204);
+                this.cameras.main.once('camerafadeoutcomplete', () => {
+                    this.scene.start('PostcardScene');
+                });
             });
         } else {
             this.add.text(fromLectureHall ? 270 : 690, 496,
@@ -179,6 +219,15 @@ class CompletionScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * getComment
+     * 
+     * Returns a teacher-style comment string based on the player's letter grade.
+     * Used to populate the Comments section of the report card.
+     * 
+     * @param {string} grade - Letter grade: 'A', 'B', 'C', or 'F'
+     * @returns {string} A contextual comment for the report card
+     */
     getComment(grade) {
         switch(grade) {
             case 'A': return "Excellent retention and recall. Student demonstrates outstanding sequential memory skills.";
@@ -189,6 +238,18 @@ class CompletionScene extends Phaser.Scene {
         }
     }
 
+    /**
+     * drawButton
+     * 
+     * Reusable helper that draws a styled dark button using Phaser Graphics
+     * and an invisible rectangle as the interactive hit area.
+     * Hover state is handled by redrawing the background with a lighter color.
+     * 
+     * @param {number} cx - Center x position of the button
+     * @param {number} cy - Center y position of the button
+     * @param {string} label - Text displayed on the button
+     * @param {function} callback - Function called when the button is clicked
+     */
     drawButton(cx, cy, label, callback) {
         const btnGfx = this.add.graphics();
         btnGfx.fillStyle(0x1a1a2e, 1);
@@ -199,6 +260,7 @@ class CompletionScene extends Phaser.Scene {
             fill: '#f5f0e8'
         }).setOrigin(0.5);
 
+        // Invisible rectangle sits on top as the actual interactive hit area
         this.add.rectangle(cx, cy, 220, 36, 0x000000, 0)
             .setInteractive({ useHandCursor: true })
             .on('pointerover', () => {
